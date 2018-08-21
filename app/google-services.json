@@ -1,0 +1,86 @@
+{
+  "project_info": {
+    "project_number": "966195964564",
+    "firebase_url": "https://dakwah-a62e8.firebaseio.com",
+    "project_id": "dakwah-a62e8",
+    "storage_bucket": "dakwah-a62e8.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:966195964564:android:0c4b56ba8a073427",
+        "android_client_info": {
+          "package_name": "com.dotlab.dakwah"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "966195964564-e8fekp7q1vq5ka5fv3eruv3ll8dgel0c.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCmLhQ5sOQudnnv78tERSohzWB01hXUQ9s"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:966195964564:android:41d9dc8e10d48e50",
+        "android_client_info": {
+          "package_name": "mobile.omandotkom.dakwahsosial"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "966195964564-epv883uqc5fteddkmd9679r0c27pkhvq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "mobile.omandotkom.dakwahsosial",
+            "certificate_hash": "a02fe80355003f78b440ef8c6caeb8d0f97f5463"
+          }
+        },
+        {
+          "client_id": "966195964564-e8fekp7q1vq5ka5fv3eruv3ll8dgel0c.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCmLhQ5sOQudnnv78tERSohzWB01hXUQ9s"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "966195964564-e8fekp7q1vq5ka5fv3eruv3ll8dgel0c.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#FAFAFA</color>
+    <color name="colorPrimaryDark">#FAFAFA</color>
+    <color name="colorAccent">#757575</color>
+    <color name="toolbarIconColor">#FFFFFF</color>
+    <color name="loginPageBackgroundColor">#FAFAFA</color>
+    <color name="productGridBackgroundColor">#FFFFFF</color>
+
+    <color name="black_overlay">#66000000</color>
+
+
+</resources>
