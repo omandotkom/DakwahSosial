@@ -23,11 +23,12 @@ import mobile.omandotkom.dakwahsosial.R;
 import mobile.omandotkom.dakwahsosial.webview.BrowserActivity;
 
 public class NotificationService extends FirebaseMessagingService {
+    private final String CHANNEL_ID = "mobile.omandotkom.dakwahsosial";
     private String TAG = "TAG_NOTIFICATION";
     public NotificationService() {
 
     }
-    private final String CHANNEL_ID = "mobile.omandotkom.dakwahsosial";
+
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
     //Log.d(TAG,remoteMessage.getNotification().getBody());

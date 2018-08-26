@@ -8,9 +8,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 
-import java.io.Console;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements NavigationHost{
@@ -24,7 +22,7 @@ public class MainActivity extends AppCompatActivity implements NavigationHost{
             getSupportFragmentManager()
                     .beginTransaction()
                     //.add(R.id.container, new LoginFragment())
-                   .add(R.id.container,new compose_post() )
+                   .add(R.id.container,new ComposePost() )
                     .commit();
         }
     }
@@ -40,7 +38,7 @@ public class MainActivity extends AppCompatActivity implements NavigationHost{
         List<Fragment> fragments = getSupportFragmentManager().getFragments();
         if (fragments != null) {
             for (Fragment f : fragments) {
-                if (f instanceof compose_post) {
+                if (f instanceof ComposePost) {
                     f.onActivityResult(requestCode, resultCode, data);
                 }
             }

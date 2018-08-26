@@ -1,11 +1,14 @@
 package mobile.omandotkom.dakwahsosial.pojo;
 
-public class Post {
-private String title, content;
-private String imagePath;
-private final String STATUS = "publish";
-private final String EXCERPT = "view";
+import android.text.Html;
+import android.text.SpannableString;
 
+public class Post {
+    private final String STATUS = "publish";
+    private final String EXCERPT = "view";
+    private String title, content;
+    private ImageResponse imageResponse = null;
+    private String html;
     public String getSTATUS() {
         return STATUS;
     }
@@ -14,12 +17,13 @@ private final String EXCERPT = "view";
         return EXCERPT;
     }
 
-    public String getImagePath() {
-        return imagePath;
+    public ImageResponse getImageResponse() {
+        if (imageResponse!=null) return imageResponse;
+        else return null;
     }
 
-    public void setImagePath(String imagePath) {
-        this.imagePath = imagePath;
+    public void setImageResponse(ImageResponse imageResponse) {
+        this.imageResponse = imageResponse;
     }
 
     public String getTitle() {
@@ -38,7 +42,11 @@ private final String EXCERPT = "view";
         this.content = content;
     }
 
-    private String toHtml(){
-    return "";
-}
+    public String getHtml() {
+        return html;
+    }
+
+    public void setHtml(String html) {
+        this.html = html;
+    }
 }

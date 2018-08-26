@@ -43,4 +43,8 @@
     <string name="notification_title">Ada Artikel Baru</string>
     <string name="default_notification_channel_id" translatable="false">dakwah_default_channel</string>
 
+
+    <!--Warning Messages -->
+    <string name="title_warning">Anda belum menentukan judul.</string>
+    <string name="content_warning">Anda belum memasukan isi artikel.</string>
 </resources>
