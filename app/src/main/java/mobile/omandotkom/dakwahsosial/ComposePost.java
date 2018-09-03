@@ -30,11 +30,10 @@ import com.myhexaville.smartimagepicker.OnImagePickedListener;
 
 import java.io.IOException;
 
-import mobile.omandotkom.dakwahsosial.converter.TextToHtml;
 import mobile.omandotkom.dakwahsosial.network.ImageUploader;
-import mobile.omandotkom.dakwahsosial.network.UploadStatusListener;
-import mobile.omandotkom.dakwahsosial.pojo.ImageResponse;
-import mobile.omandotkom.dakwahsosial.pojo.Post;
+import mobile.omandotkom.dakwahsosial.network.RequestMaker;
+import mobile.omandotkom.dakwahsosial.data.ImageMedia;
+import mobile.omandotkom.dakwahsosial.data.Article;
 
 //import android.util.text.SimpleDateFormat;
 
@@ -47,13 +46,14 @@ public class ComposePost extends Fragment {
     static final int REQUEST_TAKE_PHOTO = 1;
     private final String TAG = "COMPOSE_POST";
     private final int MY_PERMISSIONS_REQUEST_READ_STORAGE = 10;
-    private String mCurrentImagePath;
+   // private String mCurrentImagePath;
     private ImageView mImageView;
     private ImagePicker imagePicker;
-    private ImageResponse imageResponse;
+    private ImageMedia imageMedia = null;
     private MaterialButton nextButton, uploadPhotoButton;
     private ImageUploader imageUploader = new ImageUploader();
     private EditText editContent, editTitle;
+    private Article article;
 
     public ComposePost() {
         // Required empty public constructor
@@ -74,28 +74,12 @@ public class ComposePost extends Fragment {
         nextButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //cek jika judul kosong
-                if (editTitle.getText().toString().isEmpty()) {
-                    Toast.makeText(getContext(), R.string.title_warning, Toast.LENGTH_LONG).show();
-                }
-                if (editContent != null & editContent.getText().length() != 0) {
-                    Post post = new Post();
-                    if (mCurrentImagePath != null) {
-                        if (mCurrentImagePath.isEmpty()) {
-                            Log.d(TAG, "tida ada gambar");
-                            compose();
-                        } else {
-                            //tidak kosong
-                            Log.d(TAG, "ada gambar");
-                            compose();
-                        }
-                    } else {
-                        //mCurrentImagePath di sini null
-                        Log.d(TAG, "tida ada gambar");
-                        compose();
-                    }
-                } else {
-                    Toast.makeText(getContext(), R.string.content_warning, Toast.LENGTH_LONG).show();
+                if (editTitle.getText().toString().isEmpty() || editTitle.getText().toString().length()==0){
+                   Toast.makeText(getContext(),R.string.title_warning,Toast.LENGTH_LONG).show();
+                }else if(editContent.getText().toString().isEmpty() || editContent.getText().toString().length()==0) {
+                    Toast.makeText(getContext(),R.string.content_warning,Toast.LENGTH_LONG).show();
+                }else{
+                    compose();
                 }
             }
         });
@@ -104,7 +88,6 @@ public class ComposePost extends Fragment {
             @Override
             public void onClick(View view) {
                 requestPermission();
-
             }
         });
         imagePicker = new ImagePicker(getActivity(),
@@ -112,27 +95,28 @@ public class ComposePost extends Fragment {
             @Override
             public void onImagePicked(final Uri imageUri) {
                 try {
+                    String mCurrentImagePath;
                     mCurrentImagePath = getRealPathFromURI(getContext(), imageUri);
                     Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), imageUri);
                     bitmap = ThumbnailUtils.extractThumbnail(bitmap, 100, 100);
                     mImageView.setImageBitmap(bitmap);
+                   imageMedia = new ImageMedia();
+                    imageMedia.setLocalPath(mCurrentImagePath);
 
-                    imageUploader.uploadMultipart(getContext(), mCurrentImagePath);
+/*                    imageUploader.uploadMultipart(getContext(), mCurrentImagePath);
                     imageUploader.registerUploadStatusListener(new UploadStatusListener() {
                         @Override
                         public void onImageUploadComplete(String response) {
-                            if (imageResponse == null) {
-                                imageResponse = new ImageResponse();
-                            }
-                            imageResponse.setResponse(response);
-                            if (!imageResponse.isErrorResponse()) {
-                                Log.d(TAG, "URLNYA adalah : " + imageResponse.getUrl());
+
+                            imageMedia.setResponse(response);
+                            if (!imageMedia.isErrorResponse()) {
+                                Log.d(TAG, "URLNYA adalah : " + imageMedia.getUrl());
                             } else {
                                 Log.e(TAG, "an error occured");
                             }
 
                         }
-                    });
+                    });*/
                     //  new ImageUploader().uploadMultipart(getContext(),mCurrentImagePath);
                 } catch (IOException ioe) {
                     Log.e(TAG, ioe.getMessage());
@@ -140,9 +124,6 @@ public class ComposePost extends Fragment {
             }
         }
         );
-
-        //TODO : NANTI DIHAPUS, ini dummy data
-        mCurrentImagePath = "http://192.168.43.32/dakwah-wp/wordpress/wp-content/uploads/2018/08/668137b7518f9b1f48954cfaf77389c7.jpg";
         editTitle.setText("INI HANYA CONTOH JUDUL");
         editContent.setText("Berikut adalah contoh konten \n Begitu juga yang lain ya");
         return view;
@@ -157,15 +138,18 @@ public class ComposePost extends Fragment {
     }
 
     private void compose() {
-        Post post = new Post();
-        post.setTitle(editTitle.getText().toString());
-        post.setContent(editContent.getText().toString());
-        //TODO : nanti di hapus, ini dummy saja
-        // ImageResponse imageResponse = new ImageResponse();
-        //imageResponse.setUrl("http://192.168.43.32/dakwah-wp/wordpress/wp-content/uploads/2018/08/668137b7518f9b1f48954cfaf77389c7.jpg");
+        Article article = new Article();
+        article.setTitle(editTitle.getText().toString());
+        article.setContent(editContent.getText().toString());
+        article.setImageMedia(imageMedia);
+        //check if imageMedia null or not
 
+        if (this.imageMedia != null) {
+            article.setImageMedia(imageMedia);
+        }
 
-        Log.d(TAG, TextToHtml.getHtml(post));
+        RequestMaker requestMaker = new RequestMaker(article,getContext());
+        requestMaker.upload();
     }
 
     //chekcs the write to device permissionn

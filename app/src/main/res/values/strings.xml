@@ -47,4 +47,7 @@
     <!--Warning Messages -->
     <string name="title_warning">Anda belum menentukan judul.</string>
     <string name="content_warning">Anda belum memasukan isi artikel.</string>
+
+    <!--Create Post -->
+    <string name="Create">Tulis</string>
 </resources>

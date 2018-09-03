@@ -1,25 +1,23 @@
 package mobile.omandotkom.dakwahsosial.converter;
-import android.support.annotation.Nullable;
 
-import mobile.omandotkom.dakwahsosial.pojo.ImageResponse;
-import mobile.omandotkom.dakwahsosial.pojo.Post;
+import mobile.omandotkom.dakwahsosial.data.Article;
 
 
 public class TextToHtml {
 
-    public static String getHtml(Post post){
+    public static String getHtml(Article article){
 StringBuilder builder = new StringBuilder();
         //replaces all break to <br>
-       post.setContent(post.getContent().replaceAll("(\r\n|\r|\n|\n\r)", "<br>"));
+       article.setContent(article.getContent().replaceAll("(\r\n|\r|\n|\n\r)", "<br>"));
         //checks if image response null or not
-        if (post.getImageResponse()!=null){
+        if (article.getImageMedia()!=null){
             //if not null
-            if (!post.getImageResponse().isErrorResponse()){
+            if (!article.getImageMedia().isErrorResponse()){
                 //if the imageResponse not error, so we add the image to html
-            builder.append("<p style=\"text-align: left;\"><img class=\"size-medium wp-image-25 aligncenter\" src=\"" + post.getImageResponse().getUrl() + "\" alt=\"\" /></p>");
+            builder.append("<p style=\"text-align: left;\"><img class=\"size-medium wp-image-25 aligncenter\" src=\"" + article.getImageMedia().getUrl() + "\" alt=\"\" /></p>");
             }
         }
-        builder.append("<p style=\"text-align: left;\">" + post.getContent() + "</p>");
+        builder.append("<p style=\"text-align: left;\">" + article.getContent() + "</p>");
         return builder.toString();
     }
 }

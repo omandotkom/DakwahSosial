@@ -15,15 +15,18 @@ public class ImageUploader{
     private UploadStatusListener uploadStatusListener;
 
     private final String TAG = "IMAGEUPLOADER";
-    public void registerUploadStatusListener(UploadStatusListener listener){
-        this.uploadStatusListener = listener;
-    }
-    public void uploadMultipart(final Context context, String filepath) {
+
+    public void uploadMultipart(final Context context, String filepath, UploadStatusListener listener) {
         try {
+            this.uploadStatusListener = listener;
+            UploadNotificationConfig config = new UploadNotificationConfig();
+            config.setClearOnActionForAllStatuses(true);
+            config.setRingToneEnabled(false);
+            config.getCompleted().autoClear = true;
             final String uploadId =
-                    new MultipartUploadRequest(context,URLS.SERVER_URL + "/ImageUploader.php")
+                    new MultipartUploadRequest(context,URLS.IMAGE_UPLOAD_URL)
                             // starting from 3.1+, you can also use content:// URI string instead of absolute file
-                            .setNotificationConfig(new UploadNotificationConfig())
+                            .setNotificationConfig(config)
                             .addFileToUpload(filepath,"file")
                             .setMaxRetries(2)
                             .setDelegate(new UploadStatusDelegate() {
@@ -39,7 +42,7 @@ public class ImageUploader{
 
                                 @Override
                                 public void onCompleted(Context context, UploadInfo uploadInfo, ServerResponse serverResponse) {
-                                    Log.d(TAG, serverResponse.getBodyAsString());
+
                                     uploadStatusListener.onImageUploadComplete(serverResponse.getBodyAsString());
                                  }
 

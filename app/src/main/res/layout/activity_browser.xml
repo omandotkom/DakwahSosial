@@ -1,11 +1,19 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#0099cc"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@color/white"
+    android:orientation="vertical"
     tools:context="mobile.omandotkom.dakwahsosial.webview.BrowserActivity">
 
-
+    <Button android:paddingTop="0dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/Create"
+        android:layout_gravity="right"
+        android:id="@+id/create"
+        />
 
     <WebView
         android:id="@+id/webView"
@@ -13,4 +21,4 @@
         android:layout_height="match_parent"
         />
 
-</FrameLayout>
+</LinearLayout>
