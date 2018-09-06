@@ -18,6 +18,11 @@ StringBuilder builder = new StringBuilder();
             }
         }
         builder.append("<p style=\"text-align: left;\">" + article.getContent() + "</p>");
+        if (article.getDocument()!=null){
+            if (!article.getDocument().isErrorResponse()){
+                builder.append("<br><a href=\"" + article.getDocument().getUrl() + "\" download>unduh dokumen di sini.</a>");
+            }
+        }
         return builder.toString();
     }
 }

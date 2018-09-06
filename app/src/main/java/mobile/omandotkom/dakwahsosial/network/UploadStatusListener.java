@@ -1,5 +1,5 @@
 package mobile.omandotkom.dakwahsosial.network;
 
 public interface UploadStatusListener {
-     void onImageUploadComplete(String response);
+     void onUploadComplete(String response, int idRequest);
 }

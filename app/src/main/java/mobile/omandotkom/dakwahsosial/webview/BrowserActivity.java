@@ -1,11 +1,15 @@
 package mobile.omandotkom.dakwahsosial.webview;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.webkit.DownloadListener;
 import android.webkit.WebView;
 import android.widget.Button;
 
@@ -42,10 +46,18 @@ public class BrowserActivity extends AppCompatActivity {
         mWebView = (WebView) findViewById(R.id.webView);
         mWebView.setWebViewClient(new mobile.omandotkom.dakwahsosial.webview.WebViewClient());
         mWebView.loadUrl(URL);
+        mWebView.setDownloadListener(new DownloadListener() {
+            @Override
+            public void onDownloadStart(String s, String s1, String s2, String s3, long l) {
+                Intent i = new Intent(Intent.ACTION_VIEW);
+                i.setData(Uri.parse(s));
+                startActivity(i);
+            }
+        }
+        );
         //TODO : REMOVE THESE SHARED PREFERECES LINE
         User user = new User(getApplicationContext());
         Log.d(TAG, String.valueOf(user.isLoggedIn()));
-
 
         FirebaseMessaging.getInstance().subscribeToTopic("news")
                 .addOnCompleteListener(new OnCompleteListener<Void>() {

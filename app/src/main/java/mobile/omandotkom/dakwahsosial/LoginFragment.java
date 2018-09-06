@@ -13,8 +13,10 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import mobile.omandotkom.dakwahsosial.data.User;
+import mobile.omandotkom.dakwahsosial.network.LoginListener;
 import mobile.omandotkom.dakwahsosial.network.RequestMaker;
 
 /**
@@ -46,8 +48,20 @@ private final String TAG  = "LOGINFRAGMENT";
                     User user = new User(getContext());
                     user.setUsername(usernameEditText.getText().toString());
                     user.setPassword(passwordEditText.getText().toString());
-                    RequestMaker requestMaker = new RequestMaker(user);
-                    requestMaker.login();
+                    RequestMaker requestMaker = new RequestMaker(user, getContext());
+                    requestMaker.login(new LoginListener() {
+                        @Override
+                        public void onLoginSuccess() {
+                            String nama = new User(getContext()).getDisplay_name();
+                        if (nama!=null){
+                            Toast.makeText(getContext(),"Selamat datang, " + nama,Toast.LENGTH_LONG).show();
+                        ComposePost composePost = new ComposePost();
+                        getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.container,composePost,"ComposePost")
+                                
+                                .commit();
+                        }
+                        }
+                    });
                 }
             }
         });

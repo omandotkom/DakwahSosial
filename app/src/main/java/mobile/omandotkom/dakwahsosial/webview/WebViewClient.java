@@ -16,9 +16,11 @@ public class WebViewClient extends android.webkit.WebViewClient {
         Log.d(TAG,"Loading page for " + url);
     }
 
+
     @Override
     public void onPageFinished(WebView view, String url) {
         super.onPageFinished(view, url);
     Log.d(TAG,"Loading complete.");
     }
+
 }

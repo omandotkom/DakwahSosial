@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:clipChildren="false"
     android:clipToPadding="false"
+    android:id="@+id/compose"
     android:orientation="vertical"
     android:padding="10dp"
     android:paddingTop="2dp"

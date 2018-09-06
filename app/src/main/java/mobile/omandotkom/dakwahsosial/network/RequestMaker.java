@@ -2,6 +2,7 @@ package mobile.omandotkom.dakwahsosial.network;
 
 import android.content.Context;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
@@ -9,7 +10,6 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -26,19 +26,21 @@ public class RequestMaker {
     private final String TAG = "JSONREQUEST";
     private Article article = null;
     private Context context;
-    private User user=null;
+    private User user = null;
 
     public RequestMaker(Article article, Context context) {
         this.article = article;
         this.context = context;
     }
 
-    public RequestMaker(User user){
+    public RequestMaker(User user, Context context) {
+        this.context = context;
         this.user = user;
     }
-    public void login(){
 
-        if (user!=null){
+    public void login(LoginListener loginListener) {
+
+        if (user != null) {
             JSONObject jsonObject = new JSONObject();
             try {
                 jsonObject.put("username", user.getUsername());
@@ -49,18 +51,33 @@ public class RequestMaker {
             JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, URLS.AUTH_URL, jsonObject, new Response.Listener<JSONObject>() {
                 @Override
                 public void onResponse(JSONObject response) {
-                    Log.d(TAG,response.toString());
+                    if (user != null) {
+                        //TODO : UNCOMMENT THIS LINE
+                        user.setJSONResponse(response);
+                        user.save();
+                        loginListener.onLoginSuccess();
+                    }
+
                 }
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    Log.e(TAG,error.getMessage());
+                    if (error.networkResponse.statusCode == 403) {
+                        //Unauthorized
+                        Toast.makeText(context, "Username atau Password anda kurang tempat.", Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(context, "Error in network request (" + error.networkResponse.statusCode + ")", Toast.LENGTH_LONG).show();
+                    }
                 }
             });
-                    MySingleton.getInstance(context).addToRequestQueue(jsonObjectRequest);
-    }}
+            MySingleton.getInstance(context).addToRequestQueue(jsonObjectRequest);
+        }
+    }
 
-
+    UploadStatusListener articleUploadStatusListener;
+    public void setArticleUploadStatusListener(UploadStatusListener listener){
+        this.articleUploadStatusListener = listener;
+    }
     public void upload() {
         if (article != null) {
             //check if there's an image in it
@@ -68,17 +85,44 @@ public class RequestMaker {
                 //if there's image in it
                 ImageUploader imageUploader = new ImageUploader();
                 //Proses upload gambar
+
                 imageUploader.uploadMultipart(context, article.getImageMedia().getLocalPath(), new UploadStatusListener() {
                     @Override
-                    public void onImageUploadComplete(String response) {
-                        //sudah mendapat response
-                        Log.d(TAG, "uploading with image in it");
-                        article.getImageMedia().setResponse(response);
-
-                        compose();
+                    public void onUploadComplete(String response, int idRequest) {
+                        if (idRequest == ImageUploader.IMAGE_UPLOAD_REQUEST_CONST) {
+                            //sudah mendapat response
+                            Log.d(TAG, "uploading with image in it");
+                            article.getImageMedia().setResponse(response);
+                            if (article.getDocument()!=null){
+                                ImageUploader fileUploader = new ImageUploader();
+                                fileUploader.uploadMultipart(context, article.getDocument().getLocalPath(), new UploadStatusListener() {
+                                    @Override
+                                    public void onUploadComplete(String response, int idRequest) {
+                                        article.getDocument().setResponse(response);
+                                        compose();
+                                    }
+                                });
+                            }else {
+                                compose();
+                            }
+                        }
                     }
                 });
-            } else {
+
+            }
+            else if (article.getImageMedia()==null){
+                if (article.getDocument()!=null){
+                    ImageUploader fileUploader = new ImageUploader();
+                    fileUploader.uploadMultipart(context, article.getDocument().getLocalPath(), new UploadStatusListener() {
+                        @Override
+                        public void onUploadComplete(String response, int idRequest) {
+                            article.getDocument().setResponse(response);
+                            compose();
+                        }
+                    });
+                }
+            }
+            else {
                 compose();
                 Log.d(TAG, "uploading without image in it");
             }
@@ -96,7 +140,7 @@ public class RequestMaker {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Log.e(TAG, error.getMessage());
+
                     }
                 }) {
             @Override
@@ -130,7 +174,9 @@ public class RequestMaker {
             public void onResponse(JSONObject response) {
                 article = new Article();
                 article.setJSONResponse(response.toString());
+                articleUploadStatusListener.onUploadComplete(null,300);
                 sendNotification();
+
             }
         },
                 new Response.ErrorListener() {
@@ -147,7 +193,7 @@ public class RequestMaker {
             public Map<String, String> getHeaders() throws AuthFailureError {
                 HashMap<String, String> headers = new HashMap<String, String>();
                 headers.put("Content-Type", "application/json; charset=utf-8");
-                headers.put("Authorization", "Basic b21hbmRvdGtvbTpzeXN0ZW0zMjk4");
+                headers.put("Authorization", "Bearer " + new User(context).getToken());
                 return headers;
             }
         };

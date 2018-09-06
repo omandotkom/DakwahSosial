@@ -2,7 +2,9 @@ package mobile.omandotkom.dakwahsosial;
 
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -27,13 +29,21 @@ import android.widget.Toast;
 
 import com.myhexaville.smartimagepicker.ImagePicker;
 import com.myhexaville.smartimagepicker.OnImagePickedListener;
+import com.nbsp.materialfilepicker.MaterialFilePicker;
+import com.nbsp.materialfilepicker.ui.FilePickerActivity;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.regex.Pattern;
 
+import mobile.omandotkom.dakwahsosial.data.Article;
+import mobile.omandotkom.dakwahsosial.data.ImageMedia;
 import mobile.omandotkom.dakwahsosial.network.ImageUploader;
 import mobile.omandotkom.dakwahsosial.network.RequestMaker;
-import mobile.omandotkom.dakwahsosial.data.ImageMedia;
-import mobile.omandotkom.dakwahsosial.data.Article;
+import mobile.omandotkom.dakwahsosial.network.UploadStatusListener;
+
+import static android.app.Activity.DEFAULT_KEYS_DIALER;
+import static android.app.Activity.RESULT_OK;
 
 //import android.util.text.SimpleDateFormat;
 
@@ -43,17 +53,21 @@ import mobile.omandotkom.dakwahsosial.data.Article;
 public class ComposePost extends Fragment {
 
 
-    static final int REQUEST_TAKE_PHOTO = 1;
     private final String TAG = "COMPOSE_POST";
     private final int MY_PERMISSIONS_REQUEST_READ_STORAGE = 10;
-   // private String mCurrentImagePath;
+
+    private final int READ_EXTERNAL_STORAGE_PERMISSIONCODE = 1012;
+    public static final int FILE_PICKER_REQUEST_CODE = 1;
+    // private String mCurrentImagePath;
     private ImageView mImageView;
     private ImagePicker imagePicker;
     private ImageMedia imageMedia = null;
+    private ImageMedia document = null;
     private MaterialButton nextButton, uploadPhotoButton;
-    private ImageUploader imageUploader = new ImageUploader();
     private EditText editContent, editTitle;
+    //private String documentPath=null;
     private Article article;
+
 
     public ComposePost() {
         // Required empty public constructor
@@ -74,11 +88,11 @@ public class ComposePost extends Fragment {
         nextButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (editTitle.getText().toString().isEmpty() || editTitle.getText().toString().length()==0){
-                   Toast.makeText(getContext(),R.string.title_warning,Toast.LENGTH_LONG).show();
-                }else if(editContent.getText().toString().isEmpty() || editContent.getText().toString().length()==0) {
-                    Toast.makeText(getContext(),R.string.content_warning,Toast.LENGTH_LONG).show();
-                }else{
+                if (editTitle.getText().toString().isEmpty() || editTitle.getText().toString().length() == 0) {
+                    Toast.makeText(getContext(), R.string.title_warning, Toast.LENGTH_LONG).show();
+                } else if (editContent.getText().toString().isEmpty() || editContent.getText().toString().length() == 0) {
+                    Toast.makeText(getContext(), R.string.content_warning, Toast.LENGTH_LONG).show();
+                } else {
                     compose();
                 }
             }
@@ -87,7 +101,48 @@ public class ComposePost extends Fragment {
         uploadPhotoButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                requestPermission();
+                // requestPermission();
+                String fotoString;
+                String fileString;
+                if (imageMedia!=null){
+                    fotoString = "Hapus Foto";
+                    }else{
+                    fotoString = "Foto";
+                }
+                if (document!=null){
+                    fileString = "Batalkan File";
+
+                }else{
+                    fileString = "File";
+                }
+
+                CharSequence[] items = {fotoString, fileString};
+                AlertDialog.Builder builder = new AlertDialog.Builder(getContext())
+                        .setTitle("Pilih jenis file")
+                        .setItems(items, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                if (i == 0) {
+                                    //berarti pilih foto
+                                    //requestPermission();
+                                if (fotoString.equals("Hapus Foto")){
+                                    //berarti hapus foto
+                                        imageMedia = null;
+                                        mImageView.setImageResource(android.R.color.transparent);
+                                    }
+                                    else{
+                                    checkPermissionsAndOpenFilePicker(1);
+                                    }
+                                 }else {
+                                    if (fileString.equals("Batalkan File")){
+                                        document = null;
+                                    }else{
+                                    checkPermissionsAndOpenFilePicker(2);}
+                                }
+                            }
+                        });
+                AlertDialog alertDialog = builder.create();
+                alertDialog.show();
             }
         });
         imagePicker = new ImagePicker(getActivity(),
@@ -100,13 +155,13 @@ public class ComposePost extends Fragment {
                     Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), imageUri);
                     bitmap = ThumbnailUtils.extractThumbnail(bitmap, 100, 100);
                     mImageView.setImageBitmap(bitmap);
-                   imageMedia = new ImageMedia();
+                    imageMedia = new ImageMedia();
                     imageMedia.setLocalPath(mCurrentImagePath);
 
 /*                    imageUploader.uploadMultipart(getContext(), mCurrentImagePath);
                     imageUploader.registerUploadStatusListener(new UploadStatusListener() {
                         @Override
-                        public void onImageUploadComplete(String response) {
+                        public void onUploadComplete(String response) {
 
                             imageMedia.setResponse(response);
                             if (!imageMedia.isErrorResponse()) {
@@ -129,16 +184,34 @@ public class ComposePost extends Fragment {
         return view;
     }
 
-
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.d(TAG, "RESULT CODE : " + requestCode);
         super.onActivityResult(requestCode, resultCode, data);
-        imagePicker.handleActivityResult(resultCode, requestCode, data);
+        switch (requestCode) {
+            case FILE_PICKER_REQUEST_CODE: {
+                if (resultCode == RESULT_OK) {
+                    String path = data.getStringExtra(FilePickerActivity.RESULT_FILE_PATH);
+
+                    if (path != null) {
+                        document = new ImageMedia();
+                        document.setLocalPath(path);
+                        Log.d("Path: ", path);
+                        Toast.makeText(getContext(), "Picked file: " + path, Toast.LENGTH_LONG).show();
+                    } else {
+                        Log.d(TAG, "path is null");
+                    }
+                }
+            }
+            default:
+                imagePicker.handleActivityResult(resultCode, requestCode, data);
+                break;
+        }
 
     }
 
     private void compose() {
-        Article article = new Article();
+        article = new Article();
         article.setTitle(editTitle.getText().toString());
         article.setContent(editContent.getText().toString());
         article.setImageMedia(imageMedia);
@@ -147,41 +220,53 @@ public class ComposePost extends Fragment {
         if (this.imageMedia != null) {
             article.setImageMedia(imageMedia);
         }
+        if (document!=null){
 
-        RequestMaker requestMaker = new RequestMaker(article,getContext());
+            article.setDocument(document);
+        }
+
+        RequestMaker requestMaker = new RequestMaker(article, getContext());
+        requestMaker.setArticleUploadStatusListener(new UploadStatusListener() {
+            @Override
+            public void onUploadComplete(String response, int idRequest) {
+                if (idRequest == 300) {
+                    //lakukan pembersihan resource
+                    Toast.makeText(getContext(), "Berhasil menambahkan post baru.", Toast.LENGTH_LONG).show();
+                    editContent.setText("");
+                    editTitle.setText("");
+                    if (article != null) {
+                        article.setImageMedia(null);
+                        article = null;
+
+                    }
+                    imageMedia = null;
+                    document = null;
+                    mImageView.setImageResource(android.R.color.transparent);
+                }
+            }
+        });
         requestMaker.upload();
     }
 
-    //chekcs the write to device permissionn
-    private void requestPermission() {
-        // Here, thisActivity is the current activity
-        if (ContextCompat.checkSelfPermission(getContext(),
-                Manifest.permission.READ_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
 
-            // Permission is not granted
-
-            // No explanation needed; request the permission
-            ActivityCompat.requestPermissions(getActivity(),
-                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-                    MY_PERMISSIONS_REQUEST_READ_STORAGE);
-
-            // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
-            // app-defined int constant. The callback method gets the
-            // result of the request.
-
-        } else {
-            // Permission has already been granted
-            Log.d(TAG, "Permission granted");
-            //dispatchTakePictureIntent();
-            imagePicker.choosePicture(true);
-        }
-    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        imagePicker.handlePermission(requestCode, grantResults);
+        switch (requestCode) {
+            case FILE_PICKER_REQUEST_CODE: {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    openFilePicker();
+                } else {
+                    showError();
+                }
+                break;
+            }
+            default: {
+                imagePicker.handlePermission(requestCode, grantResults);
+            }
+        }
 
 
     }
@@ -203,4 +288,43 @@ public class ComposePost extends Fragment {
             }
         }
     }
+
+    private void checkPermissionsAndOpenFilePicker(int TYPE_ID) {
+        String permission = Manifest.permission.READ_EXTERNAL_STORAGE;
+
+        if (ContextCompat.checkSelfPermission(getContext(), permission) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(), permission)) {
+                showError();
+            } else {
+                ActivityCompat.requestPermissions(getActivity(), new String[]{permission}, READ_EXTERNAL_STORAGE_PERMISSIONCODE);
+            }
+        } else {
+            if (TYPE_ID == 1) {
+                imagePicker.choosePicture(false);
+            } else if (TYPE_ID == 2) {
+                openFilePicker();
+
+            }
+        }
+    }
+
+    private void showError() {
+        Toast.makeText(getContext(), "Allow external storage reading", Toast.LENGTH_SHORT).show();
+    }
+
+    private void openFilePicker() {
+        new MaterialFilePicker()
+                .withActivity(getActivity())
+                .withCloseMenu(true)
+                .withFilter(Pattern.compile(".*\\.pdf$"))
+                .withRequestCode(FILE_PICKER_REQUEST_CODE)
+                .withHiddenFiles(false)
+                .withTitle("Pilih Dokumen")
+                .start();
+
+    }
 }
+
+
+
+

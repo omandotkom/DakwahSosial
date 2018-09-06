@@ -14,6 +14,15 @@ public class Article {
     private String html;
     private String JSONResponse;
     private String link;
+    private ImageMedia document;
+
+    public ImageMedia getDocument() {
+        return document;
+    }
+
+    public void setDocument(ImageMedia document) {
+        this.document = document;
+    }
 
     public boolean isErrorThrown() {
         return isErrorThrown;

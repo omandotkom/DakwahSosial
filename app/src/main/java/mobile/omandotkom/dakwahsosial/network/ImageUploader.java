@@ -13,7 +13,7 @@ import mobile.omandotkom.dakwahsosial.URLS;
 
 public class ImageUploader{
     private UploadStatusListener uploadStatusListener;
-
+    public static final int IMAGE_UPLOAD_REQUEST_CONST = 1001;
     private final String TAG = "IMAGEUPLOADER";
 
     public void uploadMultipart(final Context context, String filepath, UploadStatusListener listener) {
@@ -22,6 +22,7 @@ public class ImageUploader{
             UploadNotificationConfig config = new UploadNotificationConfig();
             config.setClearOnActionForAllStatuses(true);
             config.setRingToneEnabled(false);
+            config.setClearOnActionForAllStatuses(true);
             config.getCompleted().autoClear = true;
             final String uploadId =
                     new MultipartUploadRequest(context,URLS.IMAGE_UPLOAD_URL)
@@ -32,7 +33,7 @@ public class ImageUploader{
                             .setDelegate(new UploadStatusDelegate() {
                                 @Override
                                 public void onProgress(Context context, UploadInfo uploadInfo) {
-
+                                Log.d(TAG,"Uploading " + filepath);
                                 }
 
                                 @Override
@@ -43,7 +44,7 @@ public class ImageUploader{
                                 @Override
                                 public void onCompleted(Context context, UploadInfo uploadInfo, ServerResponse serverResponse) {
 
-                                    uploadStatusListener.onImageUploadComplete(serverResponse.getBodyAsString());
+                                    uploadStatusListener.onUploadComplete(serverResponse.getBodyAsString(), IMAGE_UPLOAD_REQUEST_CONST );
                                  }
 
                                 @Override
